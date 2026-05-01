@@ -1,4 +1,4 @@
-name: astrbot_plugin_Personality
+name: astrbot_plugin_persona_alyzer
 display_name: Persona Alyzer
 desc: Analyze today's group messages and return a personality card.
 version: 0.1.0
