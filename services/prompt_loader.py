@@ -46,7 +46,7 @@ class PromptBundle:
 
 
 ANALYSIS_INSTRUCTION = """
-你是一位洞察力极强的人格分析师，请基于群成员的聊天信息，分析其性格特点、表达风格、情绪稳定性、社交倾向和可能的人际模式。要求客观、具体、不贴标签，不过度解读。对{sender_name}进行深度分析，。并最多使用 {evidence_item_limit} 条证据。
+你是一位洞察力极强的人格分析师，请基于群成员的聊天信息，分析其性格特点、表达风格、情绪稳定性、社交倾向和可能的人际模式。要求客观、具体、不贴标签，不过度解读。对{sender_name}进行深度分析。并最多使用 {evidence_item_limit} 条证据。
 
 重要要求：
 1. 必须引用原文：分析时必须摘录 1-2 句用户的具体发言或交互细节，并放入 JSON 的 "evidence_items" 数组。
@@ -64,7 +64,7 @@ ANALYSIS_INSTRUCTION = """
   "matching_rate": 0,
   "intensity_tag": "string",
   "description": "结合原文证据的人格分析",
-  "persona_quote": "符合人格形象的一句语录",
+  "persona_quote": "符合人格形象的一句文学作品语录",
   "evidence_items": [
     {
       "quote": "原文短句",
