@@ -1,0 +1,82 @@
+{
+    "llm_provider_id": {
+        "type": "string",
+        "description": "人格分析模型 Provider ID",
+        "default": "",
+        "_special": "select_provider"
+    },
+    "min_msg_threshold": {
+        "type": "int",
+        "description": "最少目标用户发言条数",
+        "default": 10
+    },
+    "analysis_day_span": {
+        "type": "int",
+        "description": "分析最近几个自然日",
+        "default": 1
+    },
+    "context_window_size": {
+        "type": "int",
+        "description": "普通消息向前补充的上下文条数",
+        "default": 3
+    },
+    "command_cooldown_seconds": {
+        "type": "int",
+        "description": "指令冷却秒数",
+        "default": 600
+    },
+    "group_list_mode": {
+        "type": "string",
+        "description": "群聊权限模式",
+        "default": "none",
+        "options": [
+            "whitelist",
+            "blacklist",
+            "none"
+        ]
+    },
+    "group_list": {
+        "type": "list",
+        "description": "群组名单列表",
+        "default": [],
+        "items": {
+            "type": "string"
+        }
+    },
+    "render_text_summary": {
+        "type": "bool",
+        "description": "渲染图片后附带文本总结",
+        "default": true
+    },
+    "image_send_mode": {
+        "type": "string",
+        "description": "人格卡片图片发送模式",
+        "default": "base64",
+        "options": [
+            "base64",
+            "url"
+        ],
+        "hint": "base64 保持旧行为；url 会通过 AstrBot 文件服务生成 HTTP 图片链接并直接发给 NapCat，适合降低大图发送时的 NapCat 内存峰值。"
+    },
+    "image_send_url_base": {
+        "type": "string",
+        "description": "人格卡片 URL 发送基础地址",
+        "default": "",
+        "hint": "仅 image_send_mode=url 时生效。留空时使用 AstrBot 全局 callback_api_base；两个容器分离时请填写 NapCat 容器可访问的 AstrBot 地址，例如 http://astrbot:6185。"
+    },
+    "render_retry_count": {
+        "type": "int",
+        "description": "渲染失败后的额外重试次数",
+        "default": 0
+    },
+    "render_retry_interval_seconds": {
+        "type": "int",
+        "description": "渲染重试间隔秒数",
+        "default": 10
+    },
+    "evidence_quote_limit": {
+        "type": "int",
+        "description": "展示的代表发言数量上限",
+        "default": 2
+    }
+}

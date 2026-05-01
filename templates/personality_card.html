@@ -1,0 +1,933 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      --bg: {{ theme.background }};
+      --panel: {{ theme.panel }};
+      --line: {{ theme.line }};
+      --accent: {{ theme.accent }};
+      --accent-soft: {{ theme.accent_soft }};
+      --text-primary: {{ theme.text_primary }};
+      --text-secondary: {{ theme.text_secondary }};
+      --radar-fill: {{ theme.radar_fill }};
+      --section-gap: 10px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      width: fit-content;
+      min-width: 0;
+      background: transparent;
+    }
+
+    body {
+      margin: 0;
+      width: fit-content;
+      min-width: 0;
+      font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+      background:
+        radial-gradient(circle at top, rgba(255,255,255,0.92), transparent 26%),
+        linear-gradient(180deg, #ffffff 0%, var(--bg) 22%, #ece9e4 100%);
+      color: var(--text-primary);
+    }
+
+    .poster {
+      width: 800px;
+      margin: 0;
+      padding: 24px 24px 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .poster::before {
+      content: "";
+      position: absolute;
+      inset: 14px;
+      border-radius: 34px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.78), rgba(255,255,255,0.28)),
+        radial-gradient(circle at 50% 0%, rgba(255,255,255,0.86), transparent 44%);
+      border: 1px solid rgba(255,255,255,0.72);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.9);
+      z-index: 0;
+    }
+
+    .content {
+      position: relative;
+      z-index: 1;
+      padding-top: 0;
+    }
+
+    .topbar {
+      position: absolute;
+      left: 8px;
+      right: 8px;
+      top: 6px;
+      height: 92px;
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 0;
+      z-index: 4;
+      pointer-events: none;
+    }
+
+    .user-chip {
+      display: inline-flex;
+      align-items: center;
+      align-self: center;
+      gap: 12px;
+      margin-left: 12px;
+      padding: 8px 18px 8px 8px;
+      width: fit-content;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.66);
+      border: 1px solid rgba(255,255,255,0.84);
+      backdrop-filter: blur(14px);
+      box-shadow: 0 12px 28px rgba(0,0,0,0.05);
+      pointer-events: auto;
+    }
+
+    .user-chip img {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1px solid rgba(255,255,255,0.9);
+    }
+
+    .user-meta {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-self: stretch;
+      min-height: 44px;
+    }
+
+    .user-label, .section-kicker, .stat-label {
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+    }
+
+    .user-name {
+      font-size: 17px;
+      font-weight: 700;
+      line-height: 1.2;
+      color: var(--text-primary);
+    }
+
+    .header-title {
+      position: absolute;
+      right: 32px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 30px;
+      line-height: 1;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      text-align: right;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    .header-frost-mask {
+      position: absolute;
+      left: 8px;
+      right: 8px;
+      top: 6px;
+      height: 92px;
+      border-radius: 28px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.48), rgba(255,255,255,0.16)),
+        rgba(255,255,255,0.10);
+      backdrop-filter: blur(22px) saturate(120%);
+      -webkit-backdrop-filter: blur(22px) saturate(120%);
+      border: 1px solid rgba(255,255,255,0.54);
+      mask-image: linear-gradient(180deg, rgba(0,0,0,0.92), rgba(0,0,0,0.78));
+      z-index: 2;
+    }
+
+    .hero {
+      position: relative;
+      min-height: 1040px;
+      margin-top: -10px;
+      border-radius: 30px;
+      overflow: visible;
+      background:
+        radial-gradient(circle at top, rgba(255,255,255,0.58), transparent 28%),
+        linear-gradient(180deg, rgba(255,255,255,0.30), rgba(255,255,255,0.06));
+      border: 1px solid rgba(255,255,255,0.58);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
+      z-index: 1;
+    }
+
+    .hero-visual {
+        position: absolute;
+        top: 0;
+        right: -10px;
+        bottom: 0;
+        left: -10px;
+        overflow: hidden;
+        border-top-left-radius: 26px;
+        border-top-right-radius: 26px;
+        z-index: 0;
+      }
+
+    .persona-figure {
+      position: absolute;
+      inset: -18px 0 72px 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      z-index: 0;
+    }
+
+    .persona-figure img {
+      width: 100%;
+      height: auto;
+      max-width: 100%;
+      object-position: center top;
+      -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 85%, rgba(0,0,0,0) 100%);
+      mask-image: linear-gradient(180deg, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 85%, rgba(0,0,0,0) 100%);
+      filter:
+        saturate(0.94)
+        contrast(1.02)
+        drop-shadow(0 22px 42px rgba(0,0,0,0.16));
+    }
+
+    .identity {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -100px;
+      padding: 32px 32px 24px;
+      min-height: 602px;
+      border-radius: 32px;
+      background: rgba(255,255,255,0.42);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid rgba(255,255,255,0.78);
+      box-shadow:
+        0 18px 40px rgba(0,0,0,0.07),
+        inset 0 1px 0 rgba(255,255,255,0.36);
+      z-index: 3;
+    }
+
+    .identity-top {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 112px 124px;
+      justify-items: center;
+      align-items: center;
+      gap: 22px;
+    }
+
+    .identity-copy {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-width: 0;
+      text-align: center;
+    }
+
+    .archetype-row {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .archetype-label {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 7px 16px;
+      border-radius: 999px;
+      font-size: 15px;
+      line-height: 1;
+      color: #191919;
+      background: rgba(255,255,255,0.72);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.72);
+    }
+
+    .archetype-divider {
+      width: 1px;
+      height: 18px;
+      background: rgba(0,0,0,0.12);
+    }
+
+    .archetype-text {
+      font-size: 16px;
+      line-height: 1.3;
+      color: var(--text-secondary);
+    }
+
+    .name-cn {
+      margin: 0;
+      font-size: 46px;
+      line-height: 0.96;
+      font-weight: 800;
+      letter-spacing: 3px;
+      text-align: center;
+      color: var(--accent);
+    }
+
+    .name-en {
+      margin-top: 10px;
+      font-size: 22px;
+      letter-spacing: 4px;
+      text-align: center;
+      color: var(--accent);
+    }
+
+    .rarity-wrap {
+      min-height: 92px;
+      padding-left: 0;
+      border-left: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      gap: 4px;
+    }
+
+    .rarity-label {
+      font-size: 14px;
+      letter-spacing: 2px;
+      color: var(--text-secondary);
+    }
+
+    .rarity-value {
+      font-size: 24px;
+      line-height: 1;
+      font-weight: 700;
+      color: var(--accent);
+      white-space: nowrap;
+    }
+
+    .ring-wrap {
+      position: relative;
+      width: 124px;
+      min-width: 124px;
+      min-height: 92px;
+      padding-left: 22px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .ring-wrap::before {
+      content: "";
+      position: absolute;
+      left: -11px;
+      top: 50%;
+      width: 1px;
+      height: 92px;
+      background: var(--line);
+      transform: translateY(-50%);
+    }
+
+    .ring {
+      position: relative;
+      width: 120px;
+      height: 120px;
+    }
+
+    .ring-svg {
+      width: 120px;
+      height: 120px;
+      transform: rotate(-90deg);
+      overflow: visible;
+    }
+
+    .ring-track {
+      fill: none;
+      stroke: rgba(255,255,255,0.56);
+      stroke-width: 18;
+    }
+
+    .ring-progress {
+      fill: none;
+      stroke: var(--accent);
+      stroke-width: 18;
+      stroke-linecap: round;
+      stroke-dasharray: {{ matching_ring_circumference }};
+      stroke-dashoffset: {{ matching_ring_dashoffset }};
+    }
+
+    .ring-label-svg {
+      font-size: 11px;
+      letter-spacing: 1.6px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      fill: var(--text-secondary);
+    }
+
+    .ring-value-svg {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--accent);
+      fill: var(--accent);
+    }
+
+    .identity-body {
+      margin-top: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    .identity-quote {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 14px;
+      padding-right: 18px;
+    }
+
+    .identity-quote-mark {
+      width: 24px;
+      height: 2px;
+      flex: 0 0 auto;
+      border-radius: 999px;
+      background: var(--accent);
+    }
+
+    .identity-quote-text {
+      font-size: 14px;
+      line-height: 1.7;
+      font-style: italic;
+      letter-spacing: 0.3px;
+      color: var(--text-primary);
+      text-align: right;
+    }
+
+    .identity-divider {
+      height: 1px;
+      background: linear-gradient(90deg, rgba(0,0,0,0.10), rgba(0,0,0,0.04));
+    }
+
+    .identity-intro {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .identity-intro p {
+      margin: 0;
+      font-size: 16px;
+      line-height: 2;
+      color: var(--text-primary);
+    }
+
+    .identity-keywords {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .identity-keyword {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 54px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      line-height: 1.2;
+      color: var(--accent);
+      background: rgba(255,255,255,0.68);
+      border: 1px solid rgba(255,255,255,0.90);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.86);
+    }
+
+    .section {
+      margin-top: var(--section-gap);
+      padding: 24px 22px;
+      border-radius: 28px;
+      background: var(--panel);
+      backdrop-filter: blur(18px);
+      border: 1px solid rgba(255,255,255,0.78);
+      box-shadow:
+        0 18px 40px rgba(0,0,0,0.07),
+        inset 0 1px 0 rgba(255,255,255,0.86);
+    }
+
+    /* 第一段内容需要先避开悬浮的人格信息卡，再叠加统一的区块间距。 */
+    .hero + .section {
+      margin-top: calc(100px + var(--section-gap));
+    }
+
+    .section-kicker {
+      margin-bottom: 12px;
+    }
+
+    .evidence-kicker {
+      margin-top: 24px;
+      margin-bottom: 18px;
+    }
+
+    .summary {
+      font-size: 17px;
+      line-height: 1.9;
+      font-weight: 400;
+      color: var(--text-primary);
+      text-indent: 1.4em;
+      white-space: pre-wrap;
+    }
+
+    .quote-card {
+      padding: 16px 18px 14px;
+      border-left: 3px solid var(--accent);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.44);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.66);
+    }
+
+    .summary-card {
+      margin-top: 12px;
+    }
+
+    .evidence-cards {
+      margin-top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .evidence-card {
+      padding: 16px 18px 14px;
+    }
+
+    .evidence-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .evidence-head img {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1px solid rgba(255, 255, 255, 0.84);
+    }
+
+    .evidence-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .evidence-quote {
+      font-size: 16px;
+      line-height: 1.8;
+      color: var(--text-primary);
+      white-space: pre-wrap;
+      text-indent: 0.2em;
+      margin: 4px 0 12px;
+    }
+
+    .evidence-divider {
+      height: 1px;
+      background: linear-gradient(90deg, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.02));
+      margin: 0 0 12px;
+    }
+
+    .evidence-analysis {
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--text-secondary);
+      white-space: pre-wrap;
+      text-indent: 0.2em;
+      min-height: 40px;
+    }
+
+    .stats {
+      margin-top: 18px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .section.reading-section {
+      padding-bottom: 18px;
+    }
+
+    .stat {
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .stat-value {
+      margin-top: 6px;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    .time-stat {
+      gap: 3px;
+    }
+
+    .time-stat .stat-label {
+      margin-bottom: 0;
+    }
+
+    .time-stat-value {
+      margin-top: 1px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      min-height: 44px;
+    }
+
+    .time-stat-time-row,
+    .time-stat-date-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .time-stat-time-row {
+      gap: 14px;
+    }
+
+    .time-stat-date-row {
+      gap: 20px;
+    }
+
+    .time-stat-point,
+    .time-stat-date-point {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-width: 58px;
+    }
+
+    .time-stat-time {
+      font-size: 18px;
+      font-weight: 600;
+      line-height: 1.1;
+      letter-spacing: 0.2px;
+      color: var(--accent);
+      white-space: nowrap;
+    }
+
+    .time-stat-date {
+      min-width: 44px;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 1px;
+      line-height: 1;
+      transform: translateY(-1px);
+      text-align: center;
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+
+    .time-stat-time-separator {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 12px;
+      align-self: center;
+      font-size: 0;
+      line-height: 0;
+    }
+
+    .time-stat-time-separator::before {
+      content: "";
+      display: block;
+      width: 10px;
+      height: 2px;
+      border-radius: 999px;
+      background: var(--accent);
+    }
+
+    .radar-wrap {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 18px;
+      overflow: visible;
+    }
+
+    .radar-wrap svg {
+      overflow: visible;
+    }
+
+    .dimension-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .dimension-item {
+      padding-top: 14px;
+      border-top: 1px solid var(--line);
+    }
+
+    .dimension-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .dimension-meaning {
+      font-size: 13px;
+      line-height: 1.75;
+      color: var(--text-secondary);
+      margin-bottom: 10px;
+    }
+
+    .dimension-polarity {
+      display: grid;
+      grid-template-columns: 82px 1fr 82px;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .extreme {
+      font-size: 12px;
+      line-height: 1.4;
+      color: var(--text-secondary);
+    }
+
+    .extreme.right {
+      text-align: right;
+    }
+
+    .progress-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .progress-track {
+      position: relative;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.56);
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent-soft), var(--accent));
+    }
+
+    .progress-value {
+      font-size: 12px;
+      color: var(--text-secondary);
+      text-align: center;
+    }
+
+    .footer {
+      margin-top: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: var(--text-secondary);
+      font-size: 14px;
+      letter-spacing: 1.2px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="poster">
+    <div class="content">
+      <div class="header-frost-mask"></div>
+      <div class="topbar">
+        <div class="user-chip">
+          <img src="{{ user_avatar }}" alt="{{ sender_name }} avatar" />
+          <div class="user-meta">
+            <div class="user-name">{{ sender_name }}</div>
+          </div>
+        </div>
+        <div class="header-title">Persona Card</div>
+      </div>
+
+      <div class="hero">
+        <div class="hero-visual">
+          <div class="persona-figure">
+            <img src="{{ persona_image }}" alt="{{ personality_name }}" />
+          </div>
+        </div>
+        <div class="identity">
+          <div class="identity-top">
+            <div class="identity-copy">
+              <div class="archetype-row">
+                <div class="archetype-label">人格原型</div>
+                <div class="archetype-divider"></div>
+                <div class="archetype-text">{{ archetype_group }}</div>
+              </div>
+              <h1 class="name-cn">{{ personality_name }}</h1>
+              <div class="name-en">{{ personality_name_en }}</div>
+            </div>
+            <div class="rarity-wrap">
+              <div class="rarity-label">{{ rarity_label }}</div>
+              <div class="rarity-value">{{ rarity_value }}</div>
+            </div>
+            <div class="ring-wrap">
+              <div class="ring">
+                <svg class="ring-svg" viewBox="0 0 120 120" aria-hidden="true">
+                  <circle class="ring-track" cx="60" cy="60" r="{{ matching_ring_radius }}"></circle>
+                  <circle class="ring-progress" cx="60" cy="60" r="{{ matching_ring_radius }}" stroke-linecap="round"></circle>
+                  <g class="ring-text-group" transform="rotate(90 60 60)">
+                    <text class="ring-label-svg" x="60" y="48" text-anchor="middle">MATCH</text>
+                    <text class="ring-value-svg" x="60" y="79" text-anchor="middle">{{ matching_rate }}%</text>
+                  </g>
+                </svg>
+              </div>
+            </div>
+          </div>
+          <div class="identity-body">
+            <div class="identity-quote">
+              <div class="identity-quote-mark"></div>
+              <div class="identity-quote-text">{{ persona_quote }}</div>
+            </div>
+            <div class="identity-divider"></div>
+            <div class="identity-intro">
+              {% for paragraph in persona_intro_paragraphs %}
+              <p>{{ paragraph }}</p>
+              {% endfor %}
+            </div>
+            <div class="identity-divider"></div>
+            <div class="identity-keywords">
+              {% for keyword in persona_keywords %}
+              <div class="identity-keyword">{{ keyword }}</div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section reading-section">
+        <div class="section-kicker">Analysis</div>
+        <div class="summary-card quote-card">
+          <div class="summary">{{ description }}</div>
+        </div>
+
+        {% if evidence_items %}
+        <div class="section-kicker evidence-kicker">Evidence Quote</div>
+        <div class="evidence-cards">
+          {% for item in evidence_items %}
+          <div class="evidence-card quote-card">
+            <div class="evidence-head">
+              <img src="{{ user_avatar }}" alt="{{ sender_name }} avatar" />
+              <div class="evidence-name">{{ sender_name }}</div>
+            </div>
+            <div class="evidence-quote">{{ item.quote }}</div>
+            <div class="evidence-divider"></div>
+            <div class="evidence-analysis">{{ item.analysis }}</div>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="stats">
+          <div class="stat">
+            <div class="stat-label">TRAITS</div>
+            <div class="stat-value">{{ intensity_tag }}</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">SAMPLES</div>
+            <div class="stat-value">{{ sampled_message_count }} 条</div>
+          </div>
+          <div class="stat time-stat">
+            <div class="stat-label">TIME</div>
+            <div class="stat-value time-stat-value">
+              <div class="time-stat-time-row">
+                <div class="time-stat-point">
+                  <div class="time-stat-time">{{ time_window_start_label }}</div>
+                </div>
+                <div class="time-stat-time-separator">-</div>
+                <div class="time-stat-point">
+                  <div class="time-stat-time">{{ time_window_end_label }}</div>
+                </div>
+              </div>
+              <div class="time-stat-date-row">
+                <div class="time-stat-date-point">
+                  <div class="time-stat-date">{{ time_window_start_date_label }}</div>
+                </div>
+                <div class="time-stat-date-point">
+                  <div class="time-stat-date">{{ time_window_end_date_label }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-kicker">Dimension Signal</div>
+        <div class="radar-wrap">
+          <svg width="420" height="400" viewBox="0 0 420 400" aria-label="人格雷达图">
+            <g transform="translate(50,30)">
+              <line x1="160" y1="160" x2="160" y2="28" stroke="rgba(0,0,0,0.05)" stroke-width="1"></line>
+              <line x1="160" y1="160" x2="292" y2="124" stroke="rgba(0,0,0,0.05)" stroke-width="1"></line>
+              <line x1="160" y1="160" x2="242" y2="286" stroke="rgba(0,0,0,0.05)" stroke-width="1"></line>
+              <line x1="160" y1="160" x2="78" y2="286" stroke="rgba(0,0,0,0.05)" stroke-width="1"></line>
+              <line x1="160" y1="160" x2="28" y2="124" stroke="rgba(0,0,0,0.05)" stroke-width="1"></line>
+              <polygon points="160,28 292,124 242,286 78,286 28,124" fill="rgba(255,255,255,0.22)" stroke="rgba(0,0,0,0.05)" stroke-width="1.2"></polygon>
+              <polygon points="160,60 258,132 220,252 100,252 62,132" fill="none" stroke="rgba(0,0,0,0.05)" stroke-width="1.1"></polygon>
+              <polygon points="160,92 224,140 198,220 122,220 96,140" fill="none" stroke="rgba(0,0,0,0.05)" stroke-width="1.1"></polygon>
+              <polygon points="{{ radar_points }}" fill="{{ theme.radar_fill }}" stroke="{{ theme.accent }}" stroke-width="2.5"></polygon>
+              <circle cx="160" cy="160" r="4.5" fill="{{ theme.accent }}" fill-opacity="0.78"></circle>
+              <text x="160" y="6" text-anchor="middle" font-size="18" fill="{{ theme.text_secondary }}">驱动极性</text>
+              <text x="318" y="124" text-anchor="start" font-size="18" fill="{{ theme.text_secondary }}">逻辑载荷</text>
+              <text x="250" y="326" text-anchor="middle" font-size="18" fill="{{ theme.text_secondary }}">社交熵值</text>
+              <text x="70" y="326" text-anchor="middle" font-size="18" fill="{{ theme.text_secondary }}">变革烈度</text>
+              <text x="-66" y="124" text-anchor="start" font-size="18" fill="{{ theme.text_secondary }}">共情阈值</text>
+            </g>
+          </svg>
+        </div>
+
+        <div class="dimension-grid">
+          {% for item in dimension_items %}
+          <div class="dimension-item">
+            <div class="dimension-name">{{ item.name }}</div>
+            <div class="dimension-meaning">{{ item.meaning }}</div>
+            <div class="dimension-polarity">
+              <div class="extreme">{{ item.low_label }}</div>
+              <div class="progress-wrap">
+                <div class="progress-track">
+                  <div class="progress-fill" style="width: {{ item.value }}%;"></div>
+                </div>
+                <div class="progress-value">{{ item.value }} / 100</div>
+              </div>
+              <div class="extreme right">{{ item.high_label }}</div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="footer">
+        <div>Generated At {{ analyzed_at }}</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
