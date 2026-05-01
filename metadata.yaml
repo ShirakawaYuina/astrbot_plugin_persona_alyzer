@@ -3,4 +3,4 @@ display_name: Persona Alyzer
 desc: Analyze today's group messages and return a personality card.
 version: 1.1.0
 author: AsryMiu
-repo: https://github.com/ShirakawaYuina/astrbot_plugin_persona_alyzer
+repo: "https://github.com/ShirakawaYuina/astrbot_plugin_persona_alyzer"
