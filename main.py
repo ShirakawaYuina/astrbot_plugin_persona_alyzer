@@ -14,6 +14,14 @@ from astrbot.core import astrbot_config, file_token_service
 from astrbot.core.message.components import At, BaseMessageComponent
 from astrbot.core.star.star_tools import StarTools
 
+from .plugin_metadata import (
+    PLUGIN_AUTHOR,
+    PLUGIN_DESC,
+    PLUGIN_NAME,
+    PLUGIN_REPO,
+    PLUGIN_ROOT,
+    PLUGIN_VERSION,
+)
 from .services.analyzer import PersonalityAnalyzer
 from .services.card_view_model import build_card_view_model
 from .services.message_sampler import sample_interaction_messages
@@ -25,10 +33,11 @@ IMAGE_SEND_MODE_URL = "url"
 
 
 @star.register(
-    "astrbot_plugin_Personality",
-    "AstrBot Team",
-    "Analyze today's group messages and render a personality card.",
-    "0.1.0",
+    PLUGIN_NAME,
+    PLUGIN_AUTHOR,
+    PLUGIN_DESC,
+    PLUGIN_VERSION,
+    PLUGIN_REPO,
 )
 class PersonalityPlugin(star.Star):
     """人格分析插件主入口。"""
@@ -40,8 +49,8 @@ class PersonalityPlugin(star.Star):
     ) -> None:
         super().__init__(context)
         self.config = config or {}
-        self.plugin_root = Path(__file__).resolve().parent
-        self.data_dir = StarTools.get_data_dir("astrbot_plugin_Personality")
+        self.plugin_root = PLUGIN_ROOT
+        self.data_dir = StarTools.get_data_dir(PLUGIN_NAME)
         self.prompt_loader = PromptLoader(self.plugin_root)
         self.result_store = ResultStore(self)
 

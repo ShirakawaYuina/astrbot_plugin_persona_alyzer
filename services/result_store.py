@@ -6,6 +6,8 @@ from pathlib import Path
 
 from astrbot.core.star.star_tools import StarTools
 
+from ..plugin_metadata import PLUGIN_NAME
+
 
 class ResultStore:
     """管理最新一次分析结果与冷却信息。"""
@@ -33,7 +35,7 @@ class ResultStore:
         )
         if data_dir:
             return Path(data_dir)
-        return StarTools.get_data_dir("astrbot_plugin_Personality")
+        return StarTools.get_data_dir(PLUGIN_NAME)
 
     def _get_personality_stats_path(self) -> Path:
         return self._get_data_dir() / self._personality_stats_filename()
