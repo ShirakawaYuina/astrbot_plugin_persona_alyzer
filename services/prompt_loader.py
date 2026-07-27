@@ -50,9 +50,10 @@ ANALYSIS_INSTRUCTION = """
 
 重要要求：
 1. 必须引用原文：分析时必须摘录 1-2 句用户的具体发言或交互细节，并放入 JSON 的 "evidence_items" 数组。
-2. 每个证据项都必须包含 quote 和 analysis 两个字段，其中 analysis 必须用 2-3 句解释这段原文为什么能支撑判断。
+2. 每个 evidence_items 项都必须包含 quote 和 analysis 两个字段，其中 analysis 必须用 2-3 句解释这段原文为什么能支撑判断。
 3. 结论必须克制：只能依据给定发言和对话细节推断，不要编造未出现的经历、身份或现实背景。
 4. 输出必须是合法 JSON：不要输出 Markdown、解释文字或代码块。
+5. description 必须要有足够的深度。，且至多不超过400字。
 
 请严格输出以下 JSON 结构：
 {
