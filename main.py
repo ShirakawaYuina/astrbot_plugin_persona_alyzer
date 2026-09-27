@@ -27,6 +27,7 @@ from .services.card_view_model import build_card_view_model
 from .services.message_sampler import sample_interaction_messages
 from .services.prompt_loader import PromptLoader
 from .services.result_store import ResultStore
+from .services.stats_view_model import build_stats_view_model
 
 IMAGE_SEND_MODE_BASE64 = "base64"
 IMAGE_SEND_MODE_URL = "url"
@@ -227,7 +228,10 @@ class PersonalityPlugin(star.Star):
 
         return prepared_path
 
-    async def _render_personality_card_image(self, render_payload: dict) -> str | None:
+    async def _render_personality_card_image(
+        self, render_payload: dict, template: str | None = None
+    ) -> str | None:
+        """按重试配置渲染人格长图，缺省模板为人格卡片，统计图可传入自有模板。"""
         retry_count = max(int(self._get_config_value("render_retry_count", 0) or 0), 0)
         retry_interval_seconds = max(
             int(self._get_config_value("render_retry_interval_seconds", 10) or 10),
@@ -239,7 +243,7 @@ class PersonalityPlugin(star.Star):
         for attempt in range(1, total_attempts + 1):
             try:
                 image_path = await self.html_render(
-                    self._load_card_template(),
+                    template or self._load_card_template(),
                     render_payload,
                     return_url=False,
                     options={
@@ -733,6 +737,10 @@ class PersonalityPlugin(star.Star):
         template_path = self.plugin_root / "templates" / "personality_card.html"
         return template_path.read_text(encoding="utf-8")
 
+    def _load_stats_template(self) -> str:
+        template_path = self.plugin_root / "templates" / "personality_stats.html"
+        return template_path.read_text(encoding="utf-8")
+
     @filter.command("persona")
     async def today_personality(self, event: AstrMessageEvent):
         """分析触发者在目标群内的近期文本发言，并返回人格卡片。"""
@@ -935,3 +943,59 @@ class PersonalityPlugin(star.Star):
             yield event.plain_result("人格卡片渲染失败，请稍后重试。")
         if self._get_config_value("render_text_summary", True):
             yield event.plain_result(self._build_summary_text(normalized))
+
+    @filter.command("persona_stats", alias={"人格统计"})
+    async def persona_statistics(self, event: AstrMessageEvent):
+        """以图片形式返回全平台累计的人格判定分布统计。"""
+        event.should_call_llm(True)
+        session_type = self._get_session_type(event)
+        self._log_analysis_event(
+            "收到人格统计命令",
+            会话类型=session_type,
+            平台=event.get_platform_id(),
+            发送者=event.get_sender_id(),
+        )
+
+        stats = await self.result_store.get_personality_stats()
+        if stats["total_count"] <= 0:
+            self._log_analysis_event(
+                "人格统计为空",
+                会话类型=session_type,
+                平台=event.get_platform_id(),
+            )
+            yield event.plain_result(
+                "还没有任何人格分析记录，先用 /persona 生成一张人格卡片吧。"
+            )
+            return
+
+        stats_payload = build_stats_view_model(stats)
+        self._log_analysis_event(
+            "人格统计渲染开始",
+            会话类型=session_type,
+            总分析次数=stats_payload["total_count"],
+            已解锁人格=stats_payload["unlocked_count"],
+            原型总数=stats_payload["total_archetypes"],
+        )
+
+        image_path = await self._render_personality_card_image(
+            stats_payload,
+            self._load_stats_template(),
+        )
+        if not image_path:
+            self._log_analysis_event(
+                "人格统计渲染失败",
+                会话类型=session_type,
+                总分析次数=stats_payload["total_count"],
+            )
+            yield event.plain_result("人格统计图渲染失败，请稍后重试。")
+            return
+
+        self._log_analysis_event(
+            "人格统计渲染完成",
+            会话类型=session_type,
+            总分析次数=stats_payload["total_count"],
+            已解锁人格=stats_payload["unlocked_count"],
+        )
+        image_result = await self._send_card_image(event, image_path)
+        if image_result is not None:
+            yield image_result

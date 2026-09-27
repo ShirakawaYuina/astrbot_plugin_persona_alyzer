@@ -1,5 +1,8 @@
 # Personality Plugin
 
-Group command: `/今日人格`
+群聊指令：
 
-The plugin analyzes only the triggering user's messages from the current group and current day.
+- `/persona`：分析触发者（或被 @ 的成员）在当前群内的近期文本发言，并返回人格卡片。
+- `/persona_stats`（别名 `/人格统计`）：以图片形式返回全平台累计的人格判定分布统计。
+
+人格统计口径为全平台累计数据，包含累计分析次数、已解锁人格数 / 36 的图鉴进度，以及出现次数 TOP 10 的人格排行榜。
