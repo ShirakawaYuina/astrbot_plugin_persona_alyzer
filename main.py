@@ -977,6 +977,8 @@ class PersonalityPlugin(star.Star):
             原型总数=stats_payload["total_archetypes"],
         )
 
+        await event.send(event.plain_result("正在汇总全平台人格数据，生成统计图…"))
+
         image_path = await self._render_personality_card_image(
             stats_payload,
             self._load_stats_template(),
